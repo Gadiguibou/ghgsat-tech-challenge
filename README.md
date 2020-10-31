@@ -1,2 +1,2 @@
-# ghgsat-tech-challenge-3
+# ghgsat-tech-challenge
 Solution to GHGSat's tech challenge
