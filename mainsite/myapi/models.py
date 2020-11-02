@@ -6,6 +6,7 @@ import os
 # Imports for Target class
 from django.core.validators import MaxValueValidator, MinValueValidator
 from PIL import Image
+import io
 import requests
 
 # Imports for Observation class

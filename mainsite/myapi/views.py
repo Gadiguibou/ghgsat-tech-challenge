@@ -3,8 +3,10 @@ from rest_framework import generics, status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+import io
 
 from .models import Target, Observation
+from .renderers import JPEGRenderer, PNGRenderer
 from .serializers import TargetSerializer, ObservationSerializer
 
 
@@ -29,6 +31,28 @@ class TargetDetail(generics.RetrieveUpdateDestroyAPIView):
 
     queryset = Target.objects.all()
     serializer_class = TargetSerializer
+
+
+class TargetImage(APIView):
+    """
+    A view that returns a satelite image of the target.
+    """
+
+    renderer_classes = [JPEGRenderer, PNGRenderer]
+
+    def get_object(self, pk):
+        try:
+            return Target.objects.get(pk=pk)
+        except Target.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        target = self.get_object(pk)
+        output = io.BytesIO()
+
+        target.get_image().save(output, "PNG")
+
+        return Response(output.getvalue())
 
 
 class ObservationList(APIView):
