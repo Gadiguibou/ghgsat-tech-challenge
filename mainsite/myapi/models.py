@@ -3,7 +3,6 @@ from django.db import models
 from django.utils import timezone
 import os
 
-
 # Imports for Target class
 from django.core.validators import MaxValueValidator, MinValueValidator
 from PIL import Image
@@ -80,6 +79,18 @@ class Target(models.Model):
         """
         img.paste(overlay, (0, 0), overlay)
         return img
+
+    def save_image(self, path):
+        """
+        Save an image of the target to a given local path.
+        """
+        self.get_image().save(path)
+
+    def save_overlaid(self, overlay, path):
+        """
+        Save the resulting image of a target overlaid with the given plume image.
+        """
+        self.overlay(self.get_image(), overlay).save(path)
 
 
 class Observation(models.Model):
