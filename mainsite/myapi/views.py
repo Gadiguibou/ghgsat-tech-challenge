@@ -1,4 +1,5 @@
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
+from PIL import Image
 from rest_framework import generics, status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
@@ -40,6 +41,7 @@ class TargetImage(APIView):
 
     renderer_classes = [JPEGRenderer, PNGRenderer]
 
+    # TODO: Find a way to prevent repetition here.
     def get_object(self, pk):
         try:
             return Target.objects.get(pk=pk)
@@ -51,6 +53,31 @@ class TargetImage(APIView):
         output = io.BytesIO()
 
         target.get_image().save(output, "PNG")
+
+        return Response(output.getvalue())
+
+
+class TargetResult(APIView):
+    """
+    A view that returns target's satelite image with the observation as an overlay.
+    """
+
+    renderer_classes = [JPEGRenderer, PNGRenderer]
+
+    def get_object(self, pk):
+        try:
+            return Target.objects.get(pk=pk)
+        except Target.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        target = self.get_object(pk)
+        output = io.BytesIO()
+
+        # This would normally use an associated observation file.
+        # For now we'll just use the provided plume image.
+        with Image.open("../plume.png") as overlay_img:
+            target.overlay(target.get_image(), overlay_img).save(output, "PNG")
 
         return Response(output.getvalue())
 
