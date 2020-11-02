@@ -15,3 +15,6 @@ class Target(models.Model):
         decimal_places=6,
         validators=[MaxValueValidator(180), MinValueValidator(-180)],
     )
+
+    def __str__(self) -> str:
+        return self.name
