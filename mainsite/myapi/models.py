@@ -14,12 +14,19 @@ from django.db.models.deletion import CASCADE
 
 
 def upload_to(_instance, filename):
+    """
+    Helper function to define the upload location of media files.
+    """
     now = timezone.now()
     base, extension = os.path.splitext(filename.lower())
     return f"{now:%Y%m%d%H%M%S}{extension}"
 
 
 class Target(models.Model):
+    """
+    Defines a basic format for interacting with a point in geographic coordinates. 
+    """
+
     name = models.CharField(max_length=60, unique=True)
     latitude = models.DecimalField(
         max_digits=8,
@@ -36,6 +43,14 @@ class Target(models.Model):
         return self.name
 
     def get_image(self) -> Image:
+        """
+        Queries the mapquest API for a static map of approximately 10 x 5 km centered on the target's coordinates.
+
+        Returns 
+        -------
+        Image
+            A PIL Image object containing the satellite image of the target.
+        """
         # This would normally be stored elsewhere (e.g. as an environment
         # variable) but for the sake of making this demonstration run smoothly,
         # I'll be leaving it here for now.
@@ -55,11 +70,24 @@ class Target(models.Model):
             raise Exception("Request to mapquest API was unsuccessful")
 
     def overlay(self, img: Image, overlay: Image) -> Image:
+        """
+        Overlays a given Image object with transparency over another.
+
+        Returns
+        -------
+        Image
+            A Image object with the two input pictures overlaid.
+        """
         img.paste(overlay, (0, 0), overlay)
         return img
 
 
 class Observation(models.Model):
+    """
+    The Observation class links the image of a given observation of a plume with the
+    associated Target object over which it was recorded.
+    """
+
     target = models.ForeignKey(Target, on_delete=CASCADE)
     image = models.ImageField(upload_to=upload_to)
 
