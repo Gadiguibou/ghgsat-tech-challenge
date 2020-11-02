@@ -16,6 +16,14 @@ def index(request):
     return HttpResponse("Hello from the index!")
 
 
+# Helper function to retrieve a specific object from a QuerySet or raise Http404 if the key does not exist.
+def get_object(model, pk):
+    try:
+        return model.objects.get(pk=pk)
+    except model.DoesNotExist:
+        raise Http404
+
+
 class TargetList(generics.ListCreateAPIView):
     """
     List all currently registered targets or create a new one.
@@ -41,15 +49,8 @@ class TargetImage(APIView):
 
     renderer_classes = [JPEGRenderer, PNGRenderer]
 
-    # TODO: Find a way to prevent repetition here.
-    def get_object(self, pk):
-        try:
-            return Target.objects.get(pk=pk)
-        except Target.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk, format=None):
-        target = self.get_object(pk)
+        target = get_object(Target, pk)
         output = io.BytesIO()
 
         target.get_image().save(output, "PNG")
@@ -64,14 +65,8 @@ class TargetResult(APIView):
 
     renderer_classes = [JPEGRenderer, PNGRenderer]
 
-    def get_object(self, pk):
-        try:
-            return Target.objects.get(pk=pk)
-        except Target.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk, format=None):
-        target = self.get_object(pk)
+        target = get_object(Target, pk)
         output = io.BytesIO()
 
         # This would normally use an associated observation file.
@@ -122,14 +117,8 @@ class ObservationImage(APIView):
 
     renderer_classes = [JPEGRenderer, PNGRenderer]
 
-    def get_object(self, pk):
-        try:
-            return Observation.objects.get(pk=pk)
-        except Observation.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk, format=None):
-        observation = self.get_object(pk)
+        observation = get_object(Observation, pk)
         output = io.BytesIO()
 
         Image.open(observation.image).save(output, "PNG")
@@ -144,14 +133,8 @@ class ObservationResult(APIView):
 
     renderer_classes = [JPEGRenderer, PNGRenderer]
 
-    def get_object(self, pk):
-        try:
-            return Observation.objects.get(pk=pk)
-        except Observation.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk, format=None):
-        observation = self.get_object(pk)
+        observation = get_object(Observation, pk)
         target = observation.target
         output = io.BytesIO()
 
