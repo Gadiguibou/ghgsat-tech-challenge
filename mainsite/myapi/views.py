@@ -93,7 +93,7 @@ class ObservationList(APIView):
     # Return a list of all observations
     def get(self, request, format=None):
         observations = Observation.objects.all()
-        serializer = ObservationSerializer(targets, many=True)
+        serializer = ObservationSerializer(observations, many=True)
         return Response(serializer.data)
 
     # Add a new observation
@@ -113,3 +113,50 @@ class ObservationDetail(generics.RetrieveUpdateDestroyAPIView):
 
     queryset = Observation.objects.all()
     serializer_class = ObservationSerializer
+
+
+class ObservationImage(APIView):
+    """
+    A view that returns the captured observation of the target.
+    """
+
+    renderer_classes = [JPEGRenderer, PNGRenderer]
+
+    def get_object(self, pk):
+        try:
+            return Observation.objects.get(pk=pk)
+        except Observation.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        observation = self.get_object(pk)
+        output = io.BytesIO()
+
+        Image.open(observation.image).save(output, "PNG")
+
+        return Response(output.getvalue())
+
+
+class ObservationResult(APIView):
+    """
+    A view that returns the observation overlaid over the target's satelite image.
+    """
+
+    renderer_classes = [JPEGRenderer, PNGRenderer]
+
+    def get_object(self, pk):
+        try:
+            return Observation.objects.get(pk=pk)
+        except Observation.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        observation = self.get_object(pk)
+        target = observation.target
+        output = io.BytesIO()
+
+        target.overlay(target.get_image(), Image.open(observation.image)).save(
+            output, "PNG"
+        )
+
+        return Response(output.getvalue())
