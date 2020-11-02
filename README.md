@@ -101,3 +101,12 @@ You can interact with the REST API with a command-line utility like `curl` or `h
 ![postman-example-usage-screenshot](https://user-images.githubusercontent.com/34945306/97900037-20131f00-1d08-11eb-9f01-96af562a8c3d.png)
 
 Notice you need to change the body type to `form-data` and the key type to `File` in order to add a file to your `POST` request.
+
+### Example of interacting with the API using the DRF-generated interface
+
+![rest-framework-ui-example-usage](https://user-images.githubusercontent.com/34945306/97901302-fb1fab80-1d09-11eb-95aa-f46d606711fa.png)
+
+### Example of interacting with the API using the admin interface
+
+![admin-interface-example-usage](https://user-images.githubusercontent.com/34945306/97901157-c6135900-1d09-11eb-85c0-79d1d0bf46fe.png)
+
